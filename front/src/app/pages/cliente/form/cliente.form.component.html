@@ -1,0 +1,220 @@
+<div class="container-fluid">
+  <app-page-title title="Editar Cliente" [breadcrumbItems]="breadCrumbItems"></app-page-title>
+  <div class="row">
+    <div class="col-12">
+      <div class="card-box">
+        <form class="form-horizontal" role="form" #f="ngForm" (ngSubmit)="f.form.valid && salvar()">
+          <h4 class="header-title">Dados Pessoais</h4>
+          <div class="row">
+            <div class="col-12">
+              <div class="p-2">
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="nome">Nome</label>
+                  <div class="col-sm-10">
+                    <!-- pattern="[a-zA-Z0-9]+"                          <span *ngIf="nome.errors.pattern">Esse campo aceita apenas letras e números..</span>
+                    -->
+                    <input  type="text" id="nome" required [minlength]="3" [maxlength]="100" name="nome"
+                      [(ngModel)]="cliente.nome" class="form-control" value="Nome do cliente" #nome="ngModel"
+                      [ngClass]="{ 'is-invalid': f.submitted && nome.invalid }" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'  ">
+                    <div *ngIf="f.submitted && nome.invalid" class="invalid-feedback">
+                      <span *ngIf="nome.errors.required">Preenchimento é obrigatório.</span>
+                      <span *ngIf="nome.errors.minlength">A quantidade mínima de 3 (Três) caracteres.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="cpf">CPF</label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="cpf" name="cpf" [(ngModel)]="cliente.cpf"
+                      data-toggle="input-mask" mask="000.000.000-00" data-reverse="true" required [minlength]="11"
+                      #cpf="ngModel" [ngClass]="{ 'is-invalid': f.submitted && cpf.invalid }" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                    <div *ngIf="f.submitted && cpf.invalid" class="invalid-feedback">
+                      <span *ngIf="cpf.errors.required">Preenchimento é obrigatório.</span>
+                      <span *ngIf="cpf.errors.minlength">Preencha completamente o CPF.</span>
+                    </div>
+                  </div>
+                </div>
+                <div *ngFor="let email of cliente.emails ; let i = index">
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" for="email{{i}}">E-Mail</label>
+                    <div [ngClass]="{'col-sm-9': cliente.emails.length > 1,
+                                   'col-sm-10': cliente.emails.length <= 1 }">
+                      <input type="email" id="email{{i}}" name="email{{i}}" [(ngModel)]="email.descricao"
+                        class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$" required
+                        #descricao="ngModel" [ngClass]="{ 'is-invalid': f.submitted && descricao.invalid }" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                      <div *ngIf="f.submitted && descricao.invalid" class="invalid-feedback">
+                        <span *ngIf="descricao.errors.required">Preenchimento é obrigatório.</span>
+                        <span *ngIf="descricao.errors.pattern">Informe um email válido.</span>
+                      </div>
+                    </div>
+                    <div class="col-sm-1" *ngIf="cliente.emails.length > 1">
+                      <button class="btn btn-icon waves-effect btn-danger" (click)="removerEmail(email)"> <i
+                          class="fas fa-times"></i> </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" style="float: right;" (click)="adicionarEmail()" *ngIf="role == 'ROLE_ADMIN' && tipoAcesso=='editar' || role == 'ROLE_ADMIN' && tipoAcesso==undefined"
+                class="btn btn-bordered-primary waves-effect width-md waves-light"><i class="fas fa-plus"></i> Adicionar
+                Email</button>
+            </div>
+          </div>
+          <hr>
+          <h4 class="header-title">Endereço</h4>
+          <div class="row">
+            <div class="col-12">
+              <div class="p-2">
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="cep">CEP</label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="cep" name="cep" data-toggle="cep" mask="00000-000"
+                      autocomplete="none" [ngClass]="{ 'is-invalid': f.submitted && cep.invalid }"
+                      [(ngModel)]="cliente.endereco.cep" [minlength]="8" (change)="buscarEndereco($event)"
+                      data-reverse="true" required #cep="ngModel"  [disabled]="tipoAcesso=='visualizar'">
+                    <div *ngIf="f.submitted && cep.invalid" class="invalid-feedback">
+                      <span *ngIf="cep.errors.required">Preenchimento é obrigatório.</span>
+                      <span *ngIf="cep.errors.minlength">Preencha completamente o CEP.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="logradouro">Logradouro</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="logradouro" name="logradouro" class="form-control"
+                      [(ngModel)]="cliente.endereco.logradouro" #logradouro="ngModel"
+                      [ngClass]="{ 'is-invalid': f.submitted && logradouro.invalid }" required [disabled]="tipoAcesso=='visualizar'">
+
+                    <div *ngIf="f.submitted && logradouro.invalid" class="invalid-feedback">
+                      <span *ngIf="logradouro.errors.required">Preenchimento é obrigatório.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="bairro">Bairro</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="bairro" name="bairro" class="form-control"
+                      [(ngModel)]="cliente.endereco.bairro" #bairro="ngModel"
+                      [ngClass]="{ 'is-invalid': f.submitted && bairro.invalid }" required [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                    <div *ngIf="f.submitted && bairro.invalid" class="invalid-feedback">
+                      <span *ngIf="bairro.errors.required">Preenchimento é obrigatório.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="localidade">Cidade</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="localidade" name="localidade" class="form-control"
+                      [(ngModel)]="cliente.endereco.localidade" #localidade="ngModel"
+                      [ngClass]="{ 'is-invalid': f.submitted && localidade.invalid }" required [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                    <div *ngIf="f.submitted && localidade.invalid" class="invalid-feedback">
+                      <span *ngIf="localidade.errors.required">Preenchimento é obrigatório.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="uf">UF</label>
+                  <div class="col-sm-10">
+                    <select class="form-control" id="uf" name="uf" [(ngModel)]="cliente.endereco.uf" #uf="ngModel"
+                      [ngClass]="{ 'is-invalid': f.submitted && uf.invalid }" required [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                      <option selected="true" value="">Selecione o Estado (UF)</option>
+                      <option value="AC">Acre</option>
+                      <option value="AL">Alagoas</option>
+                      <option value="AP">Amapá</option>
+                      <option value="AM">Amazonas</option>
+                      <option value="BA">Bahia</option>
+                      <option value="CE">Ceará</option>
+                      <option value="DF">Distrito Federal</option>
+                      <option value="ES">Espirito Santo</option>
+                      <option value="GO">Goiás</option>
+                      <option value="MA">Maranhão</option>
+                      <option value="MS">Mato Grosso do Sul</option>
+                      <option value="MT">Mato Grosso</option>
+                      <option value="MG">Minas Gerais</option>
+                      <option value="PA">Pará</option>
+                      <option value="PB">Paraíba</option>
+                      <option value="PR">Paraná</option>
+                      <option value="PE">Pernambuco</option>
+                      <option value="PI">Piauí</option>
+                      <option value="RJ">Rio de Janeiro</option>
+                      <option value="RN">Rio Grande do Norte</option>
+                      <option value="RS">Rio Grande do Sul</option>
+                      <option value="RO">Rondônia</option>
+                      <option value="RR">Roraima</option>
+                      <option value="SC">Santa Catarina</option>
+                      <option value="SP">São Paulo</option>
+                      <option value="SE">Sergipe</option>
+                      <option value="TO">Tocantins</option>
+                    </select>
+                    <div *ngIf="f.submitted && uf.invalid" class="invalid-feedback">
+                      <span *ngIf="uf.errors.required">Preenchimento é obrigatório.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-sm-2 col-form-label" for="complemento">Complemento</label>
+                  <div class="col-sm-10">
+                    <input type="text" id="complemento" class="form-control" name="complemento"
+                      [(ngModel)]="cliente.endereco.complemento" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <h4 class="header-title">Telefones</h4>
+          <div class="row">
+            <div class="col-12">
+              <div class="p-2">
+                <div *ngFor="let fone of cliente.telefones ; let i = index">
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" for="tipoTelefone{{i}}">Tipo do Telefone</label>
+                    <div class="col-sm-10">
+                      <select class="form-control" id="tipoTelefone{{i}}" name="tipoTelefone{{i}}"
+                        [(ngModel)]="fone.tipoTelefone" required #tipoTelefone="ngModel"
+                        [ngClass]="{ 'is-invalid': f.submitted && tipoTelefone.invalid }" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'">
+                        <option selected="">Selecione o Tipo de Telefone</option>
+                        <option value="RE">Residencial</option>
+                        <option value="CO">Comercial</option>
+                        <option value="CE">Celular</option>
+                      </select>
+                      <div *ngIf="f.submitted && tipoTelefone.invalid" class="invalid-feedback">
+                        <span *ngIf="tipoTelefone.errors.required">Preenchimento é obrigatório.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-sm-2 col-form-label" for="telefone">Telefone</label>
+                    <div [ngClass]="{'col-sm-9': cliente.telefones.length > 1,
+                      'col-sm-10': cliente.telefones.length <= 1 }">
+                      <input type="text" class="form-control" id="telefone{{i}}" name="telefone{{i}}"
+                        data-toggle="telefone" mask="(00)0000-0000" [(ngModel)]="fone.numero" [minlength]="10"
+                        data-reverse="true" required #telefone="ngModel" [disabled]="role == 'ROLE_COMUM' || tipoAcesso=='visualizar'"
+                        [ngClass]="{ 'is-invalid': f.submitted && telefone.invalid }">
+                      <div *ngIf="f.submitted && telefone.invalid" class="invalid-feedback">
+                        <span *ngIf="telefone.errors.required">Preenchimento é obrigatório.</span>
+                        <span *ngIf="telefone.errors.minlength">Preencha completamente o Telefone.</span>
+                      </div>
+                    </div>
+                    <div class="col-sm-1" *ngIf="cliente.telefones.length > 1">
+                      <button type="button" class="btn btn-icon waves-effect btn-danger"
+                        (click)="removerTelefone(fone)"> <i class="fas fa-times"></i> </button>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" style="float: right;" (click)="adicionarTelefone()"  *ngIf="role == 'ROLE_ADMIN' && tipoAcesso=='editar' || role == 'ROLE_ADMIN' && tipoAcesso==undefined"
+                  class="btn btn-bordered-primary waves-effect width-md waves-light"><i class="fas fa-plus"></i>
+                  Adicionar Telefone</button>
+              </div>
+              <br />
+              <hr>
+            </div>
+            <br />
+            <button type="submit" style="float: right;"  *ngIf="role == 'ROLE_ADMIN' && tipoAcesso=='editar' || role == 'ROLE_ADMIN' && tipoAcesso==undefined"
+              class="btn btn-bordered-success waves-effect width-md waves-light"><i class="fas fa-save"></i>
+              Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="account-pages mt-5 mb-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-5">
+        <div class="card">
+
+          <div class="card-body p-4">
+            <!-- Logo -->
+            <div class="text-center w-75 m-auto">
+              <a routerLink="/">
+                <span class="logo-lg-text-light"><i class="fe-users"></i> Clientes</span>
+              </a>
+              <p class="text-muted mb-4 mt-3">Entre com seu usuário e senha para acessa o painel do sistema.</p>
+            </div>
+
+            <form class="needs-validation" name="form" #f="ngForm"  (ngSubmit)="f.form.valid && onSubmit()">
+
+              <!-- <app-ui-preloader [display]="loading"></app-ui-preloader> -->
+
+              <ngb-alert type="danger" *ngIf="error" [dismissible]="false">{{ error }}</ngb-alert>
+
+              <div class="form-group mb-3">
+                <label for="login">Login</label>
+
+                <input type="text" [(ngModel)]="usuario.username" class="form-control" name="login" #login="ngModel"
+                [ngClass]="{ 'is-invalid': f.submitted && login.invalid }" id="login" placeholder="Login" required />
+
+                  <div *ngIf="f.submitted && login.invalid" class="invalid-feedback">
+                    <span *ngIf="login.errors.required">Preenchimento é obrigatório.</span>
+                  </div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="senha">Senha</label>
+
+                <input type="password" [(ngModel)]="usuario.password" class="form-control"  name="senha" #senha="ngModel"
+                  [ngClass]="{ 'is-invalid':f.submitted && senha.invalid }" id="senha" placeholder="Senha" required />
+                  
+                  <div *ngIf="f.submitted && senha.invalid" class="invalid-feedback">
+                    <span *ngIf="senha.errors.required">Preenchimento é obrigatório.</span>
+                  </div>
+              </div>
+              <div class="form-group mb-0 text-center">
+                <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+              </div>
+            </form>       
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer footer-alt">
+  2020 © Entrevista
+</footer>
+
+             

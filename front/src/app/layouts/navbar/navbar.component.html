@@ -1,0 +1,23 @@
+<div class="topbar-menu">
+    <div class="container-fluid">
+        <div id="navigation" [ngbCollapse]="!showMobileMenu">
+            <ul class="navigation-menu">
+                <li class="has-submenu">
+                    <a href="javascript: void(0);" (click)="onMenuClick($event)"><i class="fe-menu mr-1"></i>
+                        Menu <div class="arrow-down">
+                        </div></a>
+                    <ul class="submenu">
+                        <li>
+                            <a routerLink="/cliente/lista" class="side-nav-link-ref"
+                                routerLinkActive="active">Clientes</a>
+                        </li>
+                        <li *ngIf="role == 'ROLE_ADMIN'">
+                            <a routerLink="/cliente/cadastro" class="side-nav-link-ref"
+                                routerLinkActive="active">Novo</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
